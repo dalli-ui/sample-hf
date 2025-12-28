@@ -7,16 +7,19 @@ from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TMP_DIR = "/tmp"
-VIDEO_DURATION = 2  # seconds
-FPS = 10
-FRAME_SIZE = (320, 240)
+VIDEO_DURATION = 60  # seconds (increase duration)
+FPS = 30  # higher frame rate
+FRAME_SIZE = (1920, 1080)  # Full HD for heavy usage
+NUM_THREADS = 4  # Number of parallel video generators
 
 
 def generate_video(filename):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(filename, fourcc, FPS, FRAME_SIZE)
     for i in range(FPS * VIDEO_DURATION):
+        # Heavy computation: apply random noise and a blur
         frame = np.random.randint(0, 256, (FRAME_SIZE[1], FRAME_SIZE[0], 3), dtype=np.uint8)
+        frame = cv2.GaussianBlur(frame, (11, 11), 0)
         out.write(frame)
     out.release()
 
@@ -25,18 +28,19 @@ def main():
     autocreate = os.getenv("AUTO_CREATE", "0") == "1"
     idx = 0
 
-    def video_loop():
+    def video_loop(thread_id):
         nonlocal idx
         while autocreate:
-            filename = os.path.join(TMP_DIR, f"video_{int(time.time())}_{idx}.mp4")
-            print(f"Generating {filename}")
+            filename = os.path.join(TMP_DIR, f"video_{int(time.time())}_{idx}_t{thread_id}.mp4")
+            print(f"[Thread {thread_id}] Generating {filename}")
             generate_video(filename)
             idx += 1
-            time.sleep(1)
+            # No sleep for max resource usage
 
-    # Start video generation in a background thread
+    # Start multiple video generation threads for heavy usage
     if autocreate:
-        Thread(target=video_loop, daemon=True).start()
+        for t in range(NUM_THREADS):
+            Thread(target=video_loop, args=(t,), daemon=True).start()
 
     # Minimal HTTP server for Hugging Face Spaces
     class SimpleHandler(BaseHTTPRequestHandler):
