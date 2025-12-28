@@ -7,7 +7,7 @@ from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TMP_DIR = "/tmp"
-VIDEO_DURATION = 60  # seconds (increase duration)
+VIDEO_DURATION = 10  # seconds (increase duration)
 FPS = 30  # higher frame rate
 FRAME_SIZE = (1920, 1080)  # Full HD for heavy usage
 NUM_THREADS = 4  # Number of parallel video generators
@@ -25,7 +25,7 @@ def generate_video(filename):
 
 
 def main():
-    autocreate = os.getenv("AUTO_CREATE", "0") == "1"
+    autocreate = "1"
     idx = 0
 
     def video_loop(thread_id):
@@ -53,7 +53,7 @@ def main():
     port = int(os.getenv("PORT", 7860))
     server = HTTPServer(("0.0.0.0", port), SimpleHandler)
     print(f"Serving HTTP on port {port}")
-    server.serve_forever()
+    server.serve_forever()  
 
 if __name__ == "__main__":
     main()
