@@ -7,7 +7,7 @@ from threading import Thread
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 TMP_DIR = "/tmp"
-VIDEO_DURATION = 4  # seconds (increase duration)
+VIDEO_DURATION = 14  # seconds (increase duration)
 FPS = 30  # higher frame rate
 FRAME_SIZE = (1920, 1080)  # Full HD for heavy usage
 NUM_THREADS = 4  # Number of parallel video generators
